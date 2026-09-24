@@ -12,7 +12,7 @@ Context for any agent (AGY, Opencode, Claude Code, etc.) working on this repo.
 
 ## What this project is
 
-A take-home assessment: a tool that turns messy free-text sales notes (typos, informal shorthand) into structured, CRM-ready data using an LLM with structured output (`response_schema`) and a server-side validation layer. See `docs/MASTER_PROMPT.md` for the full spec and the decisions already made — don't reopen them without reason.
+A take-home assessment: a tool that turns messy free-text sales notes (typos, informal shorthand) into structured, CRM-ready data using an LLM with structured output and a server-side validation layer. The decisions already made are recorded in `CONTEXT.md` and `docs/adr/` — don't reopen them without reason.
 
 ## Stack
 
@@ -49,16 +49,16 @@ Must live in `.env.local` (gitignored), never hardcoded or committed.
 
 This project is meant to be developed with the usual planning/implementation loop:
 
-1. **Planning** — use the `conductor` skill on `docs/MASTER_PROMPT.md` to generate the spec/plan (SDD)
+1. **Planning** — use the `conductor` skill to generate the spec/plan (SDD)
 2. **Plan review** — use `grill-with-docs` to interview/critique the plan before implementing
 3. **Implementation** — use `conductor:implement` to execute the planned track, reviewing afterward with the other agent in the loop
 
-Follow the iteration order described in section 12 of `docs/MASTER_PROMPT.md`: scaffold → LLM integration with one preset → validation/error handling → all presets complete → polish → README/deploy. Don't skip phases or expand scope without confirming.
+Follow this iteration order: scaffold → LLM integration with one preset → validation/error handling → all presets complete → polish → README/deploy. Don't skip phases or expand scope without confirming.
 
 ## What NOT to do
 
 - Don't add authentication, a database, or persistence — out of scope
-- Don't implement CRM mapping or automatic submission (see section 9 of docs/MASTER_PROMPT.md)
+- Don't implement CRM mapping or automatic submission (see the README's out-of-scope section)
 - Don't change the chosen stack (Next.js/shadcn/Gemini) without asking first
 
 ## Documentation language

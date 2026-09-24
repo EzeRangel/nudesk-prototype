@@ -4,8 +4,6 @@ Turn messy sales-call notes into structured, CRM-ready data — with a human in 
 
 A sales rep pastes rough notes from a call (typos, shorthand, mixed languages). An LLM extracts the useful fields into a structured shape, and the rep reviews and edits the result before using it. **Nothing is ever sent to a CRM automatically.**
 
-This is a take-home prototype: it is meant to be explainable in a minute, to run locally in minutes, and to reflect deliberate decisions rather than maximum features.
-
 ## How it works
 
 ```
@@ -83,9 +81,3 @@ lib/
 docs/adr/                # decision records
 CONTEXT.md               # glossary
 ```
-
-## Screenshots
-
-<!-- Add screenshots or a short demo video here, e.g.:
-![Extraction result](docs/screenshots/result.png)
--->

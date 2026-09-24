@@ -7,7 +7,7 @@ import { LeadExtractionSchema, type LeadExtraction } from "@/lib/schema";
 import { SYSTEM_PROMPT } from "@/lib/system-prompt";
 
 /** The single place to change the model. */
-const MODEL_ID = "gemini-3.8-flash";
+const MODEL_ID = "gemini-3.5-flash";
 
 export type ExtractLeadResult =
   | { ok: true; data: LeadExtraction }

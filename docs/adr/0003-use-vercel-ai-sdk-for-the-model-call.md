@@ -2,7 +2,7 @@
 
 The spec called for calling Gemini's structured-output API directly. We instead
 use the Vercel AI SDK (`ai` + `@ai-sdk/google`) with a Google AI Studio model —
-`gemini-3.8-flash` at temperature `0` — via `generateText({ output:
+`gemini-3.5-flash` at temperature `0` — via `generateText({ output:
 Output.object({ schema }) }). One provider-agnostic call site, and the schema
 validation lives in the same place as the schema.
 
@@ -19,5 +19,6 @@ constraining; the `generateObject()` fallback was not needed. The provider's
 default environment variable, `GOOGLE_GENERATIVE_AI_API_KEY`, is used.
 
 **Model note**: the originally chosen `gemini-2.5-flash` is retired for new API
-users (the API returns `404 NOT_FOUND`). The model id lives in one constant in
-`lib/extract-lead.ts` and can be swapped on one line.
+users (the API returns `404 NOT_FOUND`). The current choice is
+`gemini-3.5-flash`. The model id lives in one constant in `lib/extract-lead.ts`
+and can be swapped on one line.

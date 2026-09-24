@@ -15,7 +15,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
-import type { LeadExtraction } from "@/lib/schema";
+import { RISK_LEVELS, type LeadExtraction } from "@/lib/schema";
 
 interface ExtractionFormProps {
   value: LeadExtraction;
@@ -25,6 +25,11 @@ interface ExtractionFormProps {
 
 /** Sentinel for the "Unknown" option, since Select values must be strings. */
 const UNKNOWN = "unknown";
+
+/** An empty input means "not stated", which the schema represents as `null`. */
+function toNullable(value: string): string | null {
+  return value === "" ? null : value;
+}
 
 export function ExtractionForm({
   value,
@@ -109,9 +114,11 @@ export function ExtractionForm({
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="low">Low</SelectItem>
-              <SelectItem value="medium">Medium</SelectItem>
-              <SelectItem value="high">High</SelectItem>
+              {RISK_LEVELS.map((level) => (
+                <SelectItem key={level} value={level}>
+                  {level.charAt(0).toUpperCase() + level.slice(1)}
+                </SelectItem>
+              ))}
             </SelectContent>
           </Select>
         </div>
@@ -140,10 +147,7 @@ export function ExtractionForm({
           id="nextAction"
           value={value.nextAction ?? ""}
           onChange={(event) =>
-            set(
-              "nextAction",
-              event.target.value === "" ? null : event.target.value,
-            )
+            set("nextAction", toNullable(event.target.value))
           }
           disabled={disabled}
           placeholder="Not stated"
@@ -175,9 +179,7 @@ function NullableTextField({
       <Input
         id={id}
         value={value ?? ""}
-        onChange={(event) =>
-          onChange(event.target.value === "" ? null : event.target.value)
-        }
+        onChange={(event) => onChange(toNullable(event.target.value))}
         disabled={disabled}
         placeholder="Not stated"
       />

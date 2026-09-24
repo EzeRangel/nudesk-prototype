@@ -34,8 +34,9 @@ _Avoid_: Score, priority, confidence.
 ### Workflow
 
 **Preset**:
-A canned, deliberately messy Note offered as a one-click demonstration.
-_Avoid_: Example, sample, template.
+A canned, deliberately messy Note offered as a one-click demonstration. The UI
+labels these "Example 1–3".
+_Avoid_: Sample, template.
 
 **Confirmation**:
 A Rep's explicit sign-off that an Extraction is accurate. An Extraction is not

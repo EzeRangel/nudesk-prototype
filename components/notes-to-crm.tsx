@@ -15,21 +15,22 @@ export function NotesToCrm() {
   const [extraction, setExtraction] = useState<LeadExtraction | null>(null);
   const [error, setError] = useState<ExtractError | null>(null);
   const [confirmed, setConfirmed] = useState(false);
+  const [emptyNotice, setEmptyNotice] = useState(false);
 
   const isLoading = status === "loading";
 
+  function handleNotesChange(next: string) {
+    setNotes(next);
+    if (emptyNotice) setEmptyNotice(false);
+  }
+
   async function handleExtract() {
     if (notes.trim() === "") {
-      setExtraction(null);
-      setError({
-        kind: "empty",
-        message: "Add some notes before extracting.",
-        raw: null,
-      });
-      setStatus("error");
+      setEmptyNotice(true);
       return;
     }
 
+    setEmptyNotice(false);
     setConfirmed(false);
     setError(null);
     setExtraction(null);
@@ -61,9 +62,10 @@ export function NotesToCrm() {
     <div className="grid flex-1 items-start gap-6 md:grid-cols-2">
       <NotesInput
         notes={notes}
-        onNotesChange={setNotes}
+        onNotesChange={handleNotesChange}
         onExtract={handleExtract}
         isLoading={isLoading}
+        notice={emptyNotice}
       />
       <ExtractionPanel
         status={status}

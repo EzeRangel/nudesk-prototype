@@ -10,6 +10,11 @@ import { z } from "zod";
  * Fields that the notes do not mention must be `null` (or an empty array), never
  * invented. This is enforced by the system prompt, and again by this schema.
  */
+/** Allowed risk levels, exported so the UI can render them without re-listing them. */
+export const RISK_LEVELS = ["low", "medium", "high"] as const;
+
+export type RiskLevel = (typeof RISK_LEVELS)[number];
+
 export const LeadExtractionSchema = z.object({
   clientName: z
     .string()
@@ -42,7 +47,7 @@ export const LeadExtractionSchema = z.object({
     .array(z.string())
     .describe("Competing products or vendors mentioned. Empty array if none."),
   riskLevel: z
-    .enum(["low", "medium", "high"])
+    .enum(RISK_LEVELS)
     .describe(
       "Inferred risk that the deal stalls, based on the tone and content of the notes. Never stated directly by the rep.",
     ),

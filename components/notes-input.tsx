@@ -1,4 +1,4 @@
-import { SparklesIcon } from "lucide-react";
+import { InfoIcon, SparklesIcon } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -17,6 +17,7 @@ interface NotesInputProps {
   onNotesChange: (notes: string) => void;
   onExtract: () => void;
   isLoading: boolean;
+  notice?: boolean;
 }
 
 export function NotesInput({
@@ -24,6 +25,7 @@ export function NotesInput({
   onNotesChange,
   onExtract,
   isLoading,
+  notice = false,
 }: NotesInputProps) {
   return (
     <Card className="flex flex-col">
@@ -41,6 +43,15 @@ export function NotesInput({
           aria-label="Call notes"
           className="min-h-56 flex-1 resize-none"
         />
+        {notice && (
+          <p
+            role="status"
+            className="flex items-center gap-1.5 text-xs text-muted-foreground"
+          >
+            <InfoIcon className="size-3.5" />
+            Add some notes before extracting.
+          </p>
+        )}
         <div className="flex flex-wrap items-center gap-2">
           <span className="text-xs text-muted-foreground">Try an example:</span>
           {PRESETS.map((preset) => (

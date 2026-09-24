@@ -4,6 +4,8 @@ Turn messy sales-call notes into structured, CRM-ready data — with a human in 
 
 A sales rep pastes rough notes from a call (typos, shorthand, mixed languages). An LLM extracts the useful fields into a structured shape, and the rep reviews and edits the result before using it. **Nothing is ever sent to a CRM automatically.**
 
+**Live prototype:** https://nudesk-prototype.vercel.app
+
 ## How it works
 
 ```

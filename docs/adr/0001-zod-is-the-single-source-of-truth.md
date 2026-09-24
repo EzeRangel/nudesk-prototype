@@ -3,8 +3,9 @@
 The LLM must return structured output and the server must validate it against the
 same shape. We define `LeadExtractionSchema` once, in Zod, and hand that one
 definition to the model call; the schema sent to the provider is derived from it,
-never authored by hand. The route additionally re-validates the result with
-`LeadExtractionSchema.parse()` as an explicit second gate.
+never authored by hand. The model module (`lib/extract-lead.ts`) additionally
+re-validates the result with `LeadExtractionSchema.parse()` as an explicit
+second gate.
 
 **Considered options**: hand-maintaining a separate JSON Schema for the provider
 (rejected — two definitions of the same shape drift apart); relying only on the

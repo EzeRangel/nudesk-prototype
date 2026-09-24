@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 
 import type { ExtractErrorKind, ExtractErrorResponse } from "@/lib/api-types";
-import { extractLead } from "@/lib/extract-lead";
+import { extractLead, type ExtractLeadResult } from "@/lib/extract-lead";
 import {
   GLOBAL_LIMIT,
   GLOBAL_WINDOW_MS,
@@ -37,6 +37,18 @@ export async function POST(request: Request) {
       "The service is busy right now. Please try again shortly.",
       null,
       global.retryAfterSeconds,
+    );
+  }
+
+  // Reject oversized bodies up front when the size is declared, so the server
+  // does not buffer them at all. The post-read check covers the rest.
+  const declaredLength = Number(request.headers.get("content-length"));
+  if (Number.isFinite(declaredLength) && declaredLength > MAX_BODY_BYTES) {
+    return errorResponse(
+      "payload_too_large",
+      413,
+      "The request body is too large.",
+      null,
     );
   }
 
@@ -90,7 +102,20 @@ export async function POST(request: Request) {
     );
   }
 
-  const result = await extractLead(notes);
+  let result: ExtractLeadResult;
+  try {
+    result = await extractLead(notes);
+  } catch (error) {
+    // extractLead handles the expected failures. This is a safety net so an
+    // unexpected error still returns the JSON envelope rather than a 500 page.
+    console.error("[extract] unexpected error:", error);
+    return errorResponse(
+      "upstream",
+      502,
+      "The model call failed. Please try again.",
+      null,
+    );
+  }
 
   if (result.ok) {
     return NextResponse.json({ data: result.data });
@@ -112,7 +137,13 @@ export async function POST(request: Request) {
   );
 }
 
-/** The originating client IP, as set by the platform's proxy. */
+/**
+ * The originating client IP.
+ *
+ * Relies on the platform's proxy setting `x-forwarded-for` (as Vercel does). If
+ * the app were ever put behind an untrusted proxy, a client could spoof this
+ * and dodge the per-IP limit — see docs/adr/0004-in-memory-abuse-guardrails.md.
+ */
 function getClientIp(request: Request): string {
   const forwardedFor = request.headers.get("x-forwarded-for");
   const first = forwardedFor?.split(",")[0]?.trim();

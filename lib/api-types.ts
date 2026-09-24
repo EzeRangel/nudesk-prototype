@@ -8,7 +8,7 @@ export type ExtractErrorKind =
   | "payload_too_large" // the request body exceeded the size limit
   | "rate_limited" // the client (or the service) hit its request budget
   | "validation" // the model returned something that failed schema validation
-  | "upstream"; // the model call itself failed (network, rate limit, etc.)
+  | "upstream"; // the model call itself failed (network, provider error, etc.)
 
 export interface ExtractRequestBody {
   /** The rep's raw call notes. */

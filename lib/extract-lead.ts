@@ -21,8 +21,10 @@ export type ExtractLeadResult =
  * modes (schema mismatch, provider error) — those come back as `ok: false`.
  */
 export async function extractLead(notes: string): Promise<ExtractLeadResult> {
+  let output: LeadExtraction | undefined;
+
   try {
-    const { output } = await generateText({
+    const generated = await generateText({
       model: google(MODEL_ID),
       system: SYSTEM_PROMPT,
       prompt: notes,
@@ -30,11 +32,16 @@ export async function extractLead(notes: string): Promise<ExtractLeadResult> {
       maxOutputTokens: MAX_OUTPUT_TOKENS,
       output: Output.object({ schema: LeadExtractionSchema }),
     });
+    output = generated.output;
 
-    // The AI SDK has already validated the output against the schema. This is
-    // the explicit second gate the spec asks for — see ADR-0001.
+    // The AI SDK has already validated this, so it is normally a no-op. It is
+    // the explicit second gate from ADR-0001: if it ever rejects we return the
+    // raw object instead of throwing, so the UI still gets its fallback.
     return { ok: true, data: LeadExtractionSchema.parse(output) };
   } catch (error) {
+    if (output !== undefined) {
+      return { ok: false, kind: "validation", raw: safeStringify(output) };
+    }
     if (NoObjectGeneratedError.isInstance(error)) {
       return { ok: false, kind: "validation", raw: error.text ?? null };
     }
@@ -43,5 +50,13 @@ export async function extractLead(notes: string): Promise<ExtractLeadResult> {
       return { ok: false, kind: "upstream" };
     }
     throw error;
+  }
+}
+
+function safeStringify(value: unknown): string | null {
+  try {
+    return JSON.stringify(value);
+  } catch {
+    return null;
   }
 }

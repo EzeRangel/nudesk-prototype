@@ -6,7 +6,11 @@ import { toast } from "sonner";
 import { ExtractionPanel } from "@/components/extraction-panel";
 import type { ExtractionStatus } from "@/components/extraction-panel";
 import { NotesInput } from "@/components/notes-input";
-import type { ExtractError } from "@/lib/api-types";
+import {
+  isExtractErrorResponse,
+  type ExtractError,
+  type ExtractResponse,
+} from "@/lib/api-types";
 import type { LeadExtraction } from "@/lib/schema";
 
 export function NotesToCrm() {
@@ -37,13 +41,29 @@ export function NotesToCrm() {
     setStatus("loading");
 
     try {
-      const next = await mockExtract();
-      setExtraction(next);
+      const response = await fetch("/api/extract", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ notes }),
+      });
+      const payload = (await response.json()) as ExtractResponse;
+
+      if (isExtractErrorResponse(payload)) {
+        setError({
+          kind: payload.kind,
+          message: payload.message,
+          raw: payload.raw,
+        });
+        setStatus("error");
+        return;
+      }
+
+      setExtraction(payload.data);
       setStatus("success");
     } catch {
       setError({
         kind: "upstream",
-        message: "Something went wrong while extracting. Please try again.",
+        message: "Couldn't reach the server. Please try again.",
         raw: null,
       });
       setStatus("error");
@@ -78,26 +98,4 @@ export function NotesToCrm() {
       />
     </div>
   );
-}
-
-/**
- * PHASE 1 MOCK — replaced by a POST /api/extract call in phase 2.
- * Returns a fixed extraction so the UI can be built and reviewed without a key.
- */
-const MOCK_EXTRACTION: LeadExtraction = {
-  clientName: "John Smith",
-  company: "Acme Corp",
-  budget: null,
-  timeline: "~2 weeks",
-  isDecisionMaker: false,
-  objections: ["Price", "Already comparing with another tool"],
-  competitors: ["Zendesk"],
-  riskLevel: "medium",
-  nextAction: null,
-};
-
-function mockExtract(): Promise<LeadExtraction> {
-  return new Promise((resolve) => {
-    setTimeout(() => resolve(structuredClone(MOCK_EXTRACTION)), 700);
-  });
 }

@@ -22,7 +22,10 @@ _Avoid_: Contact, prospect, deal, opportunity.
 
 **Extraction**:
 The structured lead information produced from a single Note. Composed of named
-Fields such as client name, company, budget, and timeline.
+Fields such as client name, company, budget, and timeline. A Field is null when
+the Note gives no concrete information for it — whether it is silent on the
+field, or only says the value is unknown, unconfirmed, or still pending. A value
+is never invented to fill the gap.
 _Avoid_: Result, output, parse, response.
 
 **Risk Level**:

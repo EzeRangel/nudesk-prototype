@@ -1,8 +1,9 @@
-import { InfoIcon, SparklesIcon } from "lucide-react";
+import { EraserIcon, InfoIcon, SparklesIcon } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import {
   Card,
+  CardAction,
   CardContent,
   CardDescription,
   CardFooter,
@@ -16,6 +17,7 @@ interface NotesInputProps {
   notes: string;
   onNotesChange: (notes: string) => void;
   onExtract: () => void;
+  onClear: () => void;
   isLoading: boolean;
   notice?: boolean;
 }
@@ -24,6 +26,7 @@ export function NotesInput({
   notes,
   onNotesChange,
   onExtract,
+  onClear,
   isLoading,
   notice = false,
 }: NotesInputProps) {
@@ -34,6 +37,18 @@ export function NotesInput({
         <CardDescription>
           Paste the raw notes from your call — typos, shorthand and all.
         </CardDescription>
+        <CardAction>
+          <Button
+            type="button"
+            variant="ghost"
+            size="sm"
+            onClick={onClear}
+            disabled={notes === "" && !notice}
+          >
+            <EraserIcon data-icon="inline-start" />
+            Clear
+          </Button>
+        </CardAction>
       </CardHeader>
       <CardContent className="flex flex-1 flex-col gap-3">
         <Textarea

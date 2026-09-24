@@ -11,6 +11,16 @@ export default function Home() {
         </p>
       </header>
       <NotesToCrm />
+      <footer className="mt-auto grid gap-1 border-t pt-4 text-xs text-muted-foreground">
+        <p>
+          Demo only — nothing is sent to a CRM. Extractions are reviewed and
+          edited by a human before use.
+        </p>
+        <p>
+          Structured extraction powered by Gemini 3.5 Flash via the Vercel AI
+          SDK.
+        </p>
+      </footer>
     </main>
   );
 }

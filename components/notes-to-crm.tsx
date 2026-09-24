@@ -70,6 +70,15 @@ export function NotesToCrm() {
     }
   }
 
+  function handleClear() {
+    setNotes("");
+    setExtraction(null);
+    setError(null);
+    setConfirmed(false);
+    setEmptyNotice(false);
+    setStatus("idle");
+  }
+
   function handleConfirm() {
     setConfirmed(true);
     toast.success("Extraction confirmed", {
@@ -84,6 +93,7 @@ export function NotesToCrm() {
         notes={notes}
         onNotesChange={handleNotesChange}
         onExtract={handleExtract}
+        onClear={handleClear}
         isLoading={isLoading}
         notice={emptyNotice}
       />

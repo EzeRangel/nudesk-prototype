@@ -4,6 +4,9 @@ import type { LeadExtraction } from "./schema";
 export type ExtractErrorKind =
   | "empty" // the rep pressed Extract with nothing in the textarea
   | "invalid_request" // the request body was missing or malformed
+  | "too_long" // the notes exceeded the length limit
+  | "payload_too_large" // the request body exceeded the size limit
+  | "rate_limited" // the client (or the service) hit its request budget
   | "validation" // the model returned something that failed schema validation
   | "upstream"; // the model call itself failed (network, rate limit, etc.)
 

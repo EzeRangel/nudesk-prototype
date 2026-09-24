@@ -4,6 +4,7 @@ import { AISDKError, generateText, NoObjectGeneratedError, Output } from "ai";
 import { google } from "@ai-sdk/google";
 
 import { LeadExtractionSchema, type LeadExtraction } from "@/lib/schema";
+import { MAX_OUTPUT_TOKENS } from "@/lib/limits";
 import { SYSTEM_PROMPT } from "@/lib/system-prompt";
 
 /** The single place to change the model. */
@@ -26,6 +27,7 @@ export async function extractLead(notes: string): Promise<ExtractLeadResult> {
       system: SYSTEM_PROMPT,
       prompt: notes,
       temperature: 0,
+      maxOutputTokens: MAX_OUTPUT_TOKENS,
       output: Output.object({ schema: LeadExtractionSchema }),
     });
 

@@ -52,9 +52,20 @@ pnpm lint    # lint
 - **Human in the loop.** The extraction arrives as an editable form, not read-only JSON, and there is an explicit Confirm step. The tool assists the rep's judgement instead of replacing it. → `docs/adr/0002-extraction-result-is-editable-and-confirmed.md`
 - **Vercel AI SDK over the provider SDK.** `ai` + `@ai-sdk/google` keep the model call provider-agnostic and keep the schema validation next to the schema. → `docs/adr/0003-use-vercel-ai-sdk-for-the-model-call.md`
 - **Absent means null.** If the notes give no concrete value for a field — including when they only say it is unknown, unconfirmed, or still pending — the field is `null` (or an empty array). Values are never invented. Enforced in `lib/system-prompt.ts` and again by the schema.
-- **Errors are explicit.** A failed extraction returns a structured envelope — `{ error: true, kind, message, raw }` — so the UI can show the raw model output instead of crashing. Kinds: `empty`, `invalid_request`, `validation`, `upstream`.
+- **Errors are explicit.** A failed extraction returns a structured envelope — `{ error: true, kind, message, raw }` — so the UI can show the raw model output instead of crashing. Kinds: `empty`, `invalid_request`, `too_long`, `payload_too_large`, `rate_limited`, `validation`, `upstream`.
 
 `CONTEXT.md` holds the project glossary.
+
+## Cost & abuse guardrails
+
+The endpoint spends real money per call, so it is guarded on both ends:
+
+- **Input limits.** Notes are capped at 4,000 characters, the request body at 16 KB, and the body must be valid JSON with a non-empty string `notes` field.
+- **Output cap.** Each call may generate at most 1,024 tokens.
+- **Rate limits.** 8 requests per minute per client IP, with a 120/minute per-instance backstop. Exceeding either returns `429` with a `Retry-After` header.
+- **Prompt injection.** The system prompt treats the notes strictly as data, so text that looks like instructions is ignored rather than executed.
+
+The limiter is **in-memory** (the project has no database), so it is per-instance and resets on a cold start. It stops casual overuse of the demo, not a determined distributed attacker — a real deployment would move it to a shared store and add auth. See `docs/adr/0004-in-memory-abuse-guardrails.md`.
 
 ## Out of scope (and what would come next)
 

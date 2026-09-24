@@ -11,6 +11,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
+import { MAX_NOTES_LENGTH } from "@/lib/limits";
 import { PRESETS } from "@/lib/presets";
 
 interface NotesInputProps {
@@ -30,6 +31,8 @@ export function NotesInput({
   isLoading,
   notice = false,
 }: NotesInputProps) {
+  const isOverLimit = notes.length > MAX_NOTES_LENGTH;
+
   return (
     <Card className="flex flex-col">
       <CardHeader>
@@ -56,6 +59,7 @@ export function NotesInput({
           onChange={(event) => onNotesChange(event.target.value)}
           placeholder="e.g. call w/ john from acme, keen but price is a worry, decides in ~2 wks..."
           aria-label="Call notes"
+          aria-invalid={isOverLimit}
           className="min-h-56 flex-1 resize-none"
         />
         {notice && (
@@ -80,13 +84,22 @@ export function NotesInput({
               {preset.label}
             </Button>
           ))}
+          <span
+            className={
+              isOverLimit
+                ? "ml-auto text-xs text-destructive"
+                : "ml-auto text-xs text-muted-foreground"
+            }
+          >
+            {notes.length} / {MAX_NOTES_LENGTH}
+          </span>
         </div>
       </CardContent>
       <CardFooter>
         <Button
           type="button"
           onClick={onExtract}
-          disabled={isLoading}
+          disabled={isLoading || isOverLimit}
           className="w-full sm:w-auto"
         >
           <SparklesIcon data-icon="inline-start" />

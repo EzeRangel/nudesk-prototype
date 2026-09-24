@@ -1,36 +1,91 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Notes → CRM
 
-## Getting Started
+Turn messy sales-call notes into structured, CRM-ready data — with a human in the loop.
 
-First, run the development server:
+A sales rep pastes rough notes from a call (typos, shorthand, mixed languages). An LLM extracts the useful fields into a structured shape, and the rep reviews and edits the result before using it. **Nothing is ever sent to a CRM automatically.**
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+This is a take-home prototype: it is meant to be explainable in a minute, to run locally in minutes, and to reflect deliberate decisions rather than maximum features.
+
+## How it works
+
+```
+browser                     Next.js route handler              Gemini
+  │  POST /api/extract            │                              │
+  ├──────────────────────────────►│  call notes                  │
+  │                               ├─────────────────────────────►│  structured output
+  │                               │◄─────────────────────────────┤  (response JSON schema)
+  │                               │  validate with Zod           │
+  │◄──────────────────────────────┤                              │
+  │  editable form + Confirm       │                              │
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+- The model is **forced into a schema** (constrained decoding), not politely asked for JSON.
+- The **same schema validates the response server-side** before it reaches the browser.
+- The result panel is **editable**, and the flow ends with the rep confirming and copying the JSON.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Run it locally
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+Requirements: Node 20.9+, pnpm, and a Google AI Studio API key.
 
-## Learn More
+```bash
+pnpm install
+cp .env.example .env.local   # then put your key in .env.local
+pnpm dev
+```
 
-To learn more about Next.js, take a look at the following resources:
+Open http://localhost:3000, click one of the example notes, and press **Extract**.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+```bash
+pnpm build   # production build
+pnpm lint    # lint
+```
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+### Environment
 
-## Deploy on Vercel
+| Variable | Purpose |
+| --- | --- |
+| `GOOGLE_GENERATIVE_AI_API_KEY` | Google AI Studio key used for the extraction call. Server-side only. |
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+`.env.local` is gitignored and the key is never sent to the client.
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## Key decisions
+
+- **Structured output, schema-first.** `LeadExtractionSchema` (Zod) is the single source of truth. It is passed to the model through the AI SDK's `Output.object()`, which sends a JSON schema to Gemini so decoding is constrained; the same schema then validates the response server-side with `.parse()`. Two layers, one definition. → `docs/adr/0001-zod-is-the-single-source-of-truth.md`
+- **Human in the loop.** The extraction arrives as an editable form, not read-only JSON, and there is an explicit Confirm step. The tool assists the rep's judgement instead of replacing it. → `docs/adr/0002-extraction-result-is-editable-and-confirmed.md`
+- **Vercel AI SDK over the provider SDK.** `ai` + `@ai-sdk/google` keep the model call provider-agnostic and keep the schema validation next to the schema. → `docs/adr/0003-use-vercel-ai-sdk-for-the-model-call.md`
+- **Absent means null.** If the notes give no concrete value for a field — including when they only say it is unknown, unconfirmed, or still pending — the field is `null` (or an empty array). Values are never invented. Enforced in `lib/system-prompt.ts` and again by the schema.
+- **Errors are explicit.** A failed extraction returns a structured envelope — `{ error: true, kind, message, raw }` — so the UI can show the raw model output instead of crashing. Kinds: `empty`, `invalid_request`, `validation`, `upstream`.
+
+`CONTEXT.md` holds the project glossary.
+
+## Out of scope (and what would come next)
+
+- **CRM field mapping.** Fields map to this schema directly today. The natural next step is a configurable `mapping.json` that maps these fields onto a specific CRM (HubSpot, Salesforce, …).
+- **Automatic submission.** A real product would POST the confirmed payload to a CRM API. Deliberately omitted — the flow ends at Copy JSON.
+- No auth, database, or persistence.
+
+## Tech stack
+
+Next.js 16 (App Router) · TypeScript · Tailwind CSS v4 · shadcn/ui · Zod · Vercel AI SDK (`ai` + `@ai-sdk/google`) with Google AI Studio (Gemini 3.5 Flash).
+
+## Project structure
+
+```
+app/
+  api/extract/route.ts   # POST endpoint: validation + error envelope
+  page.tsx               # the single screen
+components/              # notes input, editable result panel, form, raw JSON
+lib/
+  schema.ts              # LeadExtractionSchema — the single source of truth
+  extract-lead.ts        # server-only model call
+  system-prompt.ts       # versioned extraction rules
+  presets.ts             # three messy example notes
+docs/adr/                # decision records
+CONTEXT.md               # glossary
+```
+
+## Screenshots
+
+<!-- Add screenshots or a short demo video here, e.g.:
+![Extraction result](docs/screenshots/result.png)
+-->
